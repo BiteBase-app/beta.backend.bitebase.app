@@ -1,6 +1,6 @@
 name = "bitebase-backend"
 main = "main.py"
-compatibility_date = "2023-10-02"
+compatibility_date = "2024-04-09"
 compatibility_flags = ["python_workers"]
 workers_dev = false
 route = { pattern = "apis.bitebase.app/*", zone_name = "bitebase.app" }
@@ -9,15 +9,24 @@ route = { pattern = "apis.bitebase.app/*", zone_name = "bitebase.app" }
 command = "pip install -r requirements.txt"
 
 [env.production]
-vars = { ENVIRONMENT = "production" }
+vars = { 
+    ENVIRONMENT = "production",
+    FIREBASE_PROJECT_ID = "bitebase-3d5f9",
+    FIREBASE_AUTH_DOMAIN = "bitebase-3d5f9.firebaseapp.com",
+    FIREBASE_STORAGE_BUCKET = "bitebase-3d5f9.firebasestorage.app"
+}
 
 [site]
 bucket = "./static"
 
 # Add KV namespace binding
 kv_namespaces = [
-  { binding = "FLOW_KV", id = "adb94eb792f44ee48a04386cbc06e4dc" }
+    { binding = "FLOW_KV", id = "adb94eb792f44ee48a04386cbc06e4dc" }
 ]
+
+
+
+
 
 
 

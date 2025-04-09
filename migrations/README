@@ -1,0 +1,21 @@
+Generic single-database configuration with Alembic.
+
+This directory contains Alembic migration scripts for the database.
+
+To create a new migration:
+```
+alembic revision --autogenerate -m "description of changes"
+```
+
+To apply migrations:
+```
+alembic upgrade head
+```
+
+To downgrade:
+```
+alembic downgrade -1
+```
+
+For more information, see the Alembic documentation:
+https://alembic.sqlalchemy.org/en/latest/

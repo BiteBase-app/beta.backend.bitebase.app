@@ -1,0 +1,3 @@
+set FIREBASE_PROJECT_ID=bitebase-3d5f9
+set FIREBASE_AUTH_DOMAIN=bitebase-3d5f9.firebaseapp.com
+set FIREBASE_STORAGE_BUCKET=bitebase-3d5f9.firebasestorage.app

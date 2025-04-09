@@ -10,10 +10,9 @@ Usage:
 """
 
 from typing import Annotated
-
 from fastapi import Depends
-
-from databutton_app.mw.auth_mw import get_authorized_user, User
-
+from app.middleware.auth import get_authorized_user, User  # Updated import path
 
 AuthorizedUser = Annotated[User, Depends(get_authorized_user)]
+
+

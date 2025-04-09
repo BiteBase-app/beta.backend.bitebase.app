@@ -1,0 +1,3 @@
+export FIREBASE_PROJECT_ID=bitebase-3d5f9
+export FIREBASE_AUTH_DOMAIN=bitebase-3d5f9.firebaseapp.com
+export FIREBASE_STORAGE_BUCKET=bitebase-3d5f9.firebasestorage.app

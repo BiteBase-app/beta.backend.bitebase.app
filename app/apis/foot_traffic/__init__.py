@@ -1,8 +1,14 @@
-from fastapi import APIRouter, HTTPException, Query
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Query, Depends, Request
+from typing import List, Dict, Any, Optional, Union
+from pydantic import BaseModel, Field
 from enum import Enum
 from datetime import datetime, timedelta
+import time
+
+from app.middleware.auth import get_authorized_user, require_auth, User
+from app.core.logging import log_info, log_error
+from app.core.errors import NotFoundError, ValidationError
+from app.apis.models.base import BaseResponse
 
 router = APIRouter(prefix="/foot_traffic", tags=["foot_traffic"])
 
@@ -93,74 +99,210 @@ FOOT_TRAFFIC_DATA = {
     }
 }
 
-@router.get("/")
-async def get_foot_traffic_data(date_range: DateRangeEnum = DateRangeEnum.week) -> FootTrafficData:
-    """
-    Get foot traffic data for the specified date range
-    """
-    # In a real implementation, this would filter data based on the date range
-    # For now, we'll just return the sample data
-    return FOOT_TRAFFIC_DATA
+class FootTrafficResponse(BaseResponse):
+    """Standard response for foot traffic data"""
+    data: Optional[Any] = None
 
-@router.get("/summary")
-async def get_traffic_summary(date_range: DateRangeEnum = DateRangeEnum.week) -> TrafficSummary:
+@router.get("/", response_model=FootTrafficResponse)
+async def get_foot_traffic_data(
+    request: Request,
+    date_range: DateRangeEnum = DateRangeEnum.week,
+    user: User = Depends(get_authorized_user)
+) -> FootTrafficResponse:
     """
-    Get traffic summary for the specified date range
-    """
-    return FOOT_TRAFFIC_DATA["summary"]
+    Get foot traffic data for the specified date range.
 
-@router.get("/hourly")
-async def get_hourly_traffic(date_range: DateRangeEnum = DateRangeEnum.week) -> List[HourlyTraffic]:
-    """
-    Get hourly traffic data for the specified date range
-    """
-    return FOOT_TRAFFIC_DATA["hourlyData"]
+    This endpoint provides comprehensive foot traffic data including summary statistics,
+    hourly and daily breakdowns, visitor types, and conversion rates.
 
-@router.get("/daily")
-async def get_daily_traffic(date_range: DateRangeEnum = DateRangeEnum.week) -> List[DailyTraffic]:
+    - **date_range**: Filter data by day, week, month, or year
     """
-    Get daily traffic data for the specified date range
-    """
-    return FOOT_TRAFFIC_DATA["dailyData"]
+    log_info(f"Fetching foot traffic data for {date_range}", request)
 
-@router.get("/visitor-types")
-async def get_visitor_types(date_range: DateRangeEnum = DateRangeEnum.week) -> List[VisitorType]:
-    """
-    Get visitor type distribution for the specified date range
-    """
-    return FOOT_TRAFFIC_DATA["visitorTypes"]
+    try:
+        # In a real implementation, this would filter data based on the date range and user
+        # For now, we'll just return the sample data
+        return FootTrafficResponse(
+            success=True,
+            message=f"Foot traffic data for {date_range}",
+            data=FOOT_TRAFFIC_DATA
+        )
+    except Exception as e:
+        log_error(f"Error fetching foot traffic data: {str(e)}", request)
+        raise ValidationError(f"Failed to retrieve foot traffic data: {str(e)}")
 
-@router.get("/conversion-rates")
-async def get_conversion_rates(date_range: DateRangeEnum = DateRangeEnum.week) -> ConversionRates:
+@router.get("/summary", response_model=FootTrafficResponse)
+async def get_traffic_summary(
+    request: Request,
+    date_range: DateRangeEnum = DateRangeEnum.week,
+    user: User = Depends(get_authorized_user)
+) -> FootTrafficResponse:
     """
-    Get conversion rates for the specified date range
+    Get traffic summary for the specified date range.
+
+    Returns key metrics including total visitors, average daily traffic,
+    peak hours, peak days, and change percentage compared to previous period.
+
+    - **date_range**: Filter data by day, week, month, or year
     """
-    return FOOT_TRAFFIC_DATA["conversionRates"]
+    log_info(f"Fetching traffic summary for {date_range}", request)
+
+    try:
+        return FootTrafficResponse(
+            success=True,
+            message=f"Traffic summary for {date_range}",
+            data=FOOT_TRAFFIC_DATA["summary"]
+        )
+    except Exception as e:
+        log_error(f"Error fetching traffic summary: {str(e)}", request)
+        raise ValidationError(f"Failed to retrieve traffic summary: {str(e)}")
+
+@router.get("/hourly", response_model=FootTrafficResponse)
+async def get_hourly_traffic(
+    request: Request,
+    date_range: DateRangeEnum = DateRangeEnum.week,
+    user: User = Depends(get_authorized_user)
+) -> FootTrafficResponse:
+    """
+    Get hourly traffic data for the specified date range.
+
+    Returns a breakdown of foot traffic by hour of the day, showing
+    visitor counts and percentages for each hour.
+
+    - **date_range**: Filter data by day, week, month, or year
+    """
+    log_info(f"Fetching hourly traffic for {date_range}", request)
+
+    try:
+        return FootTrafficResponse(
+            success=True,
+            message=f"Hourly traffic data for {date_range}",
+            data=FOOT_TRAFFIC_DATA["hourlyData"]
+        )
+    except Exception as e:
+        log_error(f"Error fetching hourly traffic: {str(e)}", request)
+        raise ValidationError(f"Failed to retrieve hourly traffic data: {str(e)}")
+
+@router.get("/daily", response_model=FootTrafficResponse)
+async def get_daily_traffic(
+    request: Request,
+    date_range: DateRangeEnum = DateRangeEnum.week,
+    user: User = Depends(get_authorized_user)
+) -> FootTrafficResponse:
+    """
+    Get daily traffic data for the specified date range.
+
+    Returns a breakdown of foot traffic by day of the week, showing
+    visitor counts and percentages for each day.
+
+    - **date_range**: Filter data by day, week, month, or year
+    """
+    log_info(f"Fetching daily traffic for {date_range}", request)
+
+    try:
+        return FootTrafficResponse(
+            success=True,
+            message=f"Daily traffic data for {date_range}",
+            data=FOOT_TRAFFIC_DATA["dailyData"]
+        )
+    except Exception as e:
+        log_error(f"Error fetching daily traffic: {str(e)}", request)
+        raise ValidationError(f"Failed to retrieve daily traffic data: {str(e)}")
+
+@router.get("/visitor-types", response_model=FootTrafficResponse)
+async def get_visitor_types(
+    request: Request,
+    date_range: DateRangeEnum = DateRangeEnum.week,
+    user: User = Depends(get_authorized_user)
+) -> FootTrafficResponse:
+    """
+    Get visitor type distribution for the specified date range.
+
+    Returns a breakdown of visitors by type (first-time, returning, regular),
+    showing the percentage of each visitor type.
+
+    - **date_range**: Filter data by day, week, month, or year
+    """
+    log_info(f"Fetching visitor types for {date_range}", request)
+
+    try:
+        return FootTrafficResponse(
+            success=True,
+            message=f"Visitor type data for {date_range}",
+            data=FOOT_TRAFFIC_DATA["visitorTypes"]
+        )
+    except Exception as e:
+        log_error(f"Error fetching visitor types: {str(e)}", request)
+        raise ValidationError(f"Failed to retrieve visitor type data: {str(e)}")
+
+@router.get("/conversion-rates", response_model=FootTrafficResponse)
+async def get_conversion_rates(
+    request: Request,
+    date_range: DateRangeEnum = DateRangeEnum.week,
+    user: User = Depends(get_authorized_user)
+) -> FootTrafficResponse:
+    """
+    Get conversion rates for the specified date range.
+
+    Returns conversion metrics including visitor-to-customer and
+    customer-to-repeat-customer rates.
+
+    - **date_range**: Filter data by day, week, month, or year
+    """
+    log_info(f"Fetching conversion rates for {date_range}", request)
+
+    try:
+        return FootTrafficResponse(
+            success=True,
+            message=f"Conversion rate data for {date_range}",
+            data=FOOT_TRAFFIC_DATA["conversionRates"]
+        )
+    except Exception as e:
+        log_error(f"Error fetching conversion rates: {str(e)}", request)
+        raise ValidationError(f"Failed to retrieve conversion rate data: {str(e)}")
 
 class HeatmapData(BaseModel):
     highTrafficAreas: List[str]
     lowTrafficAreas: List[str]
     optimizationTips: List[str]
 
-@router.get("/heatmap")
-async def get_heatmap_data() -> HeatmapData:
+@router.get("/heatmap", response_model=FootTrafficResponse)
+async def get_heatmap_data(
+    request: Request,
+    user: User = Depends(get_authorized_user)
+) -> FootTrafficResponse:
     """
-    Get store traffic heatmap data
+    Get store traffic heatmap data.
+
+    Returns information about high and low traffic areas within the establishment,
+    along with optimization tips for improving traffic flow and customer experience.
     """
-    return {
-        "highTrafficAreas": [
-            "Front entrance",
-            "Main dining area",
-            "Bar section"
-        ],
-        "lowTrafficAreas": [
-            "Back corner tables",
-            "Private dining room",
-            "Outdoor patio (weekdays)"
-        ],
-        "optimizationTips": [
-            "Rearrange seating in low traffic areas",
-            "Add signage to highlight private dining",
-            "Consider weekday patio promotions"
-        ]
-    }
+    log_info("Fetching heatmap data", request)
+
+    try:
+        heatmap_data = {
+            "highTrafficAreas": [
+                "Front entrance",
+                "Main dining area",
+                "Bar section"
+            ],
+            "lowTrafficAreas": [
+                "Back corner tables",
+                "Private dining room",
+                "Outdoor patio (weekdays)"
+            ],
+            "optimizationTips": [
+                "Rearrange seating in low traffic areas",
+                "Add signage to highlight private dining",
+                "Consider weekday patio promotions"
+            ]
+        }
+
+        return FootTrafficResponse(
+            success=True,
+            message="Heatmap data retrieved successfully",
+            data=heatmap_data
+        )
+    except Exception as e:
+        log_error(f"Error fetching heatmap data: {str(e)}", request)
+        raise ValidationError(f"Failed to retrieve heatmap data: {str(e)}")

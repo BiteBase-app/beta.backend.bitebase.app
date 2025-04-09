@@ -40,3 +40,9 @@ coverage.xml
 
 # Uvicorn
 *.log
+
+# Secrets
+bitebase-3d5f9-*.json
+*.pem
+*.key
+
