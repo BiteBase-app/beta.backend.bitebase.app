@@ -1,0 +1,22 @@
+name = "bitebase-backend"
+main = "main.py"
+compatibility_date = "2023-10-02"
+compatibility_flags = ["python_workers"]
+workers_dev = false
+route = { pattern = "apis.bitebase.app/*", zone_name = "bitebase.app" }
+
+[build]
+command = "pip install -r requirements.txt"
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[site]
+bucket = "./static"
+
+# Add KV namespace binding
+kv_namespaces = [
+  { binding = "FLOW_KV", id = "adb94eb792f44ee48a04386cbc06e4dc" }
+]
+
+

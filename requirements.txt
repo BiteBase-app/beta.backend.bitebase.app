@@ -1,9 +1,9 @@
 # Workspace version: 1.44.5
-databutton==0.38.34
-ipykernel==6.29.5
-fastapi==0.111.0
-python-multipart==0.0.9
-uvicorn[standard]==0.29.0
+databutton
+ipykernel
+fastapi
+python-multipart
+uvicorn[standard]
 
 openai
 beautifulsoup4
